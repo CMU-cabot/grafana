@@ -90,7 +90,8 @@ export const markersLayer: MapLayerRegistryItem<MarkersConfig> = {
     } else {
       vectorLayer.setStyle((feature: FeatureLike) => {
         const idx: number = feature.get('rowIndex');
-        const dims = style.dims;
+        const frame: any = feature.get('frame');
+        const dims = getStyleDimension(frame, style, theme);
         if (!dims || !isNumber(idx)) {
           return style.maker(style.base);
         }
@@ -122,8 +123,9 @@ export const markersLayer: MapLayerRegistryItem<MarkersConfig> = {
           return; // ignore empty
         }
 
+        source.clear(true);
+
         for (const frame of data.series) {
-          style.dims = getStyleDimension(frame, style, theme);
 
           // Post updates to the legend component
           if (legend) {
@@ -136,8 +138,10 @@ export const markersLayer: MapLayerRegistryItem<MarkersConfig> = {
           }
 
           source.update(frame);
-          break; // Only the first frame for now!
         }
+
+        // only call this at the end
+        source.changed();
       },
 
       // Marker overlay options

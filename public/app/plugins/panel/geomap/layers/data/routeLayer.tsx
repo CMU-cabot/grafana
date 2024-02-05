@@ -108,7 +108,12 @@ export const routeLayer: MapLayerRegistryItem<RouteConfig> = {
     } else {
       vectorLayer.setStyle((feature: FeatureLike) => {
         const idx: number = feature.get('rowIndex');
-        const dims = style.dims;
+        const frame: any = feature.get('frame');
+        var dims = style.dims;
+        if (style.fields || hasArrows) {
+          dims = getStyleDimension(frame, style, theme);
+        }
+
         if (!dims || !isNumber(idx)) {
           return routeStyle(style.base);
         }
@@ -301,14 +306,13 @@ export const routeLayer: MapLayerRegistryItem<RouteConfig> = {
           return; // ignore empty
         }
 
-        for (const frame of data.series) {
-          if (style.fields || hasArrows) {
-            style.dims = getStyleDimension(frame, style, theme);
-          }
+        source.clear(true);
 
+        for (const frame of data.series) {
           source.updateLineString(frame);
-          break; // Only the first frame for now!
         }
+
+        source.changed();
       },
 
       // Route layer options

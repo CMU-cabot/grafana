@@ -14,7 +14,6 @@ export class FrameVectorSource<T extends Geometry = Geometry> extends VectorSour
   }
 
   update(frame: DataFrame) {
-    this.clear(true);
     const info = getGeometryField(frame, this.location);
     if (!info.field) {
       this.changed();
@@ -30,13 +29,9 @@ export class FrameVectorSource<T extends Geometry = Geometry> extends VectorSour
         })
       );
     }
-
-    // only call this at the end
-    this.changed();
   }
 
   updateLineString(frame: DataFrame) {
-    this.clear(true);
     const info = getGeometryField(frame, this.location);
     if (!info.field) {
       this.changed();
@@ -53,8 +48,5 @@ export class FrameVectorSource<T extends Geometry = Geometry> extends VectorSour
         geometry: geometry as T,
       })
     );
-
-    // only call this at the end
-    this.changed();
   }
 }
