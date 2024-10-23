@@ -28,7 +28,7 @@ func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
 	mg.AddMigration("add action column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
 			&migrator.Column{Name: "action", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
-    
+
 	mg.AddMigration("add scope column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
 			&migrator.Column{Name: "scope", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
@@ -50,8 +50,6 @@ func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
 	mg.AddMigration("add unique index builtin_role_action_scope",
 		migrator.NewAddIndexMigration(seedAssignmentTable,
 			&migrator.Index{Cols: []string{"builtin_role", "action", "scope"}, Type: migrator.UniqueIndex}))
-	
-    // mg.AddMigration("add primary key to seed_assignment", &seedAssignmentPrimaryKeyMigrator{})
 
 	mg.AddMigration("add origin column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
