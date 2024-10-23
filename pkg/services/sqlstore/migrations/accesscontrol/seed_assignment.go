@@ -14,12 +14,21 @@ ALTER TABLE seed_assignment DROP COLUMN role_name;
 ALTER TABLE seed_assignment RENAME COLUMN tmp_role_name TO role_name;`
 
 func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
-	seedAssignmentTable := migrator.Table{Name: "seed_assignment"}
+    seedAssignmentTable := migrator.Table{
+        Name: "seed_assignment",
+        Columns: []*migrator.Column{
+            {Name: "id", Type: migrator.DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+            {Name: "builtin_role", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
+            {Name: "role_name", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
+        },
+    }
 
-	mg.AddMigration("add action column to seed_assignment",
-		migrator.NewAddColumnMigration(seedAssignmentTable,
-			&migrator.Column{Name: "action", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
+    mg.AddMigration("create seed_assignment table", migrator.NewAddTableMigration(seedAssignmentTable))
 
+    mg.AddMigration("add action column to seed_assignment",
+        migrator.NewAddColumnMigration(seedAssignmentTable,
+            &migrator.Column{Name: "action", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
+    
 	mg.AddMigration("add scope column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
 			&migrator.Column{Name: "scope", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
@@ -33,23 +42,23 @@ func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
 			SQLite(migSQLITERoleNameNullable).
 			Postgres("ALTER TABLE `seed_assignment` ALTER COLUMN role_name DROP NOT NULL;").
 			Mysql("ALTER TABLE seed_assignment MODIFY role_name VARCHAR(190) DEFAULT NULL;"))
-
+	
 	mg.AddMigration("add unique index builtin_role_name back",
 		migrator.NewAddIndexMigration(seedAssignmentTable,
 			&migrator.Index{Cols: []string{"builtin_role", "role_name"}, Type: migrator.UniqueIndex}))
-
+	
 	mg.AddMigration("add unique index builtin_role_action_scope",
 		migrator.NewAddIndexMigration(seedAssignmentTable,
 			&migrator.Index{Cols: []string{"builtin_role", "action", "scope"}, Type: migrator.UniqueIndex}))
+	
+    // mg.AddMigration("add primary key to seed_assignment", &seedAssignmentPrimaryKeyMigrator{})
 
-	mg.AddMigration("add primary key to seed_assignment", &seedAssignmentPrimaryKeyMigrator{})
+    mg.AddMigration("add origin column to seed_assignment",
+        migrator.NewAddColumnMigration(seedAssignmentTable,
+            &migrator.Column{Name: "origin", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
 
-	mg.AddMigration("add origin column to seed_assignment",
-		migrator.NewAddColumnMigration(seedAssignmentTable,
-			&migrator.Column{Name: "origin", Type: migrator.DB_Varchar, Length: 190, Nullable: true}))
-
-	mg.AddMigration("add origin to plugin seed_assignment", &seedAssignmentOnCallMigrator{})
-	mg.AddMigration(PreventSeedingOnCallAccessID, &SeedAssignmentOnCallAccessMigrator{})
+    mg.AddMigration("add origin to plugin seed_assignment", &seedAssignmentOnCallMigrator{})
+    mg.AddMigration(PreventSeedingOnCallAccessID, &SeedAssignmentOnCallAccessMigrator{})
 }
 
 type seedAssignmentPrimaryKeyMigrator struct {
