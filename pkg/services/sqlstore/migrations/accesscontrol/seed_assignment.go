@@ -14,7 +14,16 @@ ALTER TABLE seed_assignment DROP COLUMN role_name;
 ALTER TABLE seed_assignment RENAME COLUMN tmp_role_name TO role_name;`
 
 func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
-	seedAssignmentTable := migrator.Table{Name: "seed_assignment"}
+	seedAssignmentTable := migrator.Table{
+		Name: "seed_assignment",
+		Columns: []*migrator.Column{
+			{Name: "id", Type: migrator.DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "builtin_role", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
+			{Name: "role_name", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
+		},
+	}
+
+	mg.AddMigration("create seed_assignment table", migrator.NewAddTableMigration(seedAssignmentTable))
 
 	mg.AddMigration("add action column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
@@ -41,8 +50,6 @@ func AddSeedAssignmentMigrations(mg *migrator.Migrator) {
 	mg.AddMigration("add unique index builtin_role_action_scope",
 		migrator.NewAddIndexMigration(seedAssignmentTable,
 			&migrator.Index{Cols: []string{"builtin_role", "action", "scope"}, Type: migrator.UniqueIndex}))
-
-	mg.AddMigration("add primary key to seed_assigment", &seedAssignmentPrimaryKeyMigrator{})
 
 	mg.AddMigration("add origin column to seed_assignment",
 		migrator.NewAddColumnMigration(seedAssignmentTable,
